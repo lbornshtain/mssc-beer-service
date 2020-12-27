@@ -1,8 +1,8 @@
 package net.monga.micro.msscbeerservice.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.monga.micro.msscbeerservice.domain.Beer;
-import net.monga.micro.msscbeerservice.repositories.BeerRepository;
+import net.monga.micro.msscbeerservice.bootstrap.BeerLoader;
+import net.monga.micro.msscbeerservice.services.BeerService;
 import net.monga.micro.msscbeerservice.web.model.BeerDto;
 import net.monga.micro.msscbeerservice.web.model.BeerStyleEnum;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -33,11 +32,13 @@ class BeerControllerTest {
     ObjectMapper objectMapper;
 
     @MockBean
-    BeerRepository beerRepository;
+    BeerService beerService;
+
+
 
     @Test
     void getBeerById() throws Exception {
-        given(beerRepository.findById(any())).willReturn(Optional.of(Beer.builder().build()));
+        given(beerService.getById(any())).willReturn(getValidBeerDto());
 
         mockMvc.perform(get("/api/v1/beer/" + UUID.randomUUID().toString()).accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk());
@@ -70,7 +71,7 @@ class BeerControllerTest {
                 .beerName("Nice Ale")
                 .beerStyle(BeerStyleEnum.ALE)
                 .price(new BigDecimal("9.99"))
-                .upc(123123123123L)
+                .upc(BeerLoader.BEER_1_UPC)
                 .build();
 
     }
