@@ -1,8 +1,7 @@
 package net.monga.micro.msscbeerservice.web.controller;
 
 import lombok.RequiredArgsConstructor;
-import net.monga.micro.msscbeerservice.repositories.BeerRepository;
-import net.monga.micro.msscbeerservice.web.mappers.BeerMapper;
+import net.monga.micro.msscbeerservice.services.BeerService;
 import net.monga.micro.msscbeerservice.web.model.BeerDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,35 +15,24 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class BeerController {
 
-    private final BeerMapper beerMapper;
-    private final BeerRepository beerRepository;
+    private final BeerService beerService;
+
 
     @GetMapping("/{beerId}")
     public ResponseEntity<BeerDto> getBeerById(@PathVariable("beerId") UUID beerId){
-
-        return new ResponseEntity<>(beerMapper.BeerToBeerDto(beerRepository.findById(beerId).get()), HttpStatus.OK);
+        return new ResponseEntity<>(beerService.getById(beerId), HttpStatus.OK);
     }
 
     @PostMapping
-    public ResponseEntity saveNewBeer(@RequestBody @Validated BeerDto beerDto){
-
-        beerRepository.save(beerMapper.BeerDtoToBeer(beerDto));
-
-        return new ResponseEntity(HttpStatus.CREATED);
+    public ResponseEntity<BeerDto> saveNewBeer(@RequestBody @Validated BeerDto beerDto){
+        return new ResponseEntity<BeerDto>(beerService.saveNewBeer(beerDto), HttpStatus.CREATED);
     }
 
     @PutMapping("/{beerId}")
-    public ResponseEntity updateBeerById(@PathVariable("beerId") UUID beerId, @RequestBody @Validated BeerDto beerDto){
-        beerRepository.findById(beerId).ifPresent(beer -> {
-            beer.setBeerName(beerDto.getBeerName());
-            beer.setBeerStyle(beerDto.getBeerStyle().name());
-            beer.setPrice(beerDto.getPrice());
-            beer.setUpc(beerDto.getUpc());
+    public ResponseEntity<BeerDto> updateBeerById(@PathVariable("beerId") UUID beerId, @RequestBody @Validated BeerDto beerDto){
+        return new ResponseEntity(beerService.updateBeer(beerId, beerDto), HttpStatus.NO_CONTENT);
 
-            beerRepository.save(beer);
-        });
 
-        return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 }
 
